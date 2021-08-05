@@ -1,0 +1,196 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">CURD OPERATION</div>
+            </div>
+            <div class="card-body">
+                <form class="form" action="" method="post">
+                    <input type="text" class="form-control" id="Id" name="Id" hidden>
+                    <div class="row mb-3">
+                        <label for="Name" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="Name" name="Name" placeholder="Enter Name">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="Code" class="col-sm-2 col-form-label">Code</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="Code" name="Code" placeholder="Enter Code">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-10 offset-md-2">
+                            <button type="button" class="btn btn-sm btn-primary" id="btnSave">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-1">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">List</div>
+            </div>
+            <div class="card-body">
+                <div class="content-box" id="content-box">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+        LoadList();
+
+        function LoadList() {
+            $.ajax({
+                type: 'POST',
+                url: '/Course/PartialCourseList',
+                success: function (data) {
+                    $('#content-box').html(data);
+                },
+                error: function (e) {
+                }
+            }).done(function () {
+            });
+        }
+
+        $('#btnSave').click(function (event) {
+            event.preventDefault();
+            var id = $('#Id').val();
+            if (id === '' || id === undefined) {
+                id = 0;
+            }
+            var name = $('#Name').val();
+            var code = $('#Code').val();
+
+            var course = {
+                Id: id,
+                Name: name,
+                Code: code
+            };
+            $.ajax({
+                type: "POST",
+                url: "/Course/Save",
+                data: JSON.stringify(course),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json" , 
+                success: function (data) {
+                    alert(data);
+                    Clear();
+                    LoadList();
+                },
+                error: function () {
+                    alert("Error occured!!")
+                }
+            });
+        });
+
+        //$("#deleteBtn").click(function () {
+        //    var id = $(this).attr("data-id");
+        //    $.ajax({
+        //        type: "POST",
+        //        url: "/Course/Delete?id=" + id,
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: "json",
+        //        success: function (data) {
+        //            alert(data);
+        //            LoadList();
+        //        },
+        //        error: function () {
+        //            alert("Error occured!!")
+        //        }
+        //    });
+        //});
+
+        $("body").on("click", "#deleteBtn", function () {
+            var id = $(this).attr("data-id");
+            $.ajax({
+                type: "POST",
+                url: "/Course/Delete?id=" + id,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    alert(data);
+                    LoadList();
+                },
+                error: function () {
+                    alert("Error occured!!")
+                }
+            });
+        });
+
+        //$("body").on("click", "#editBtn", function () {
+        //    var id = $(this).attr("data-id");
+        //    var name = $(this).attr("data-name");
+        //    var code = $(this).attr("data-code");
+
+        //    $("#Id").val(id);
+        //    $("#Name").val(name);
+        //    $("#Code").val(code);
+
+        //    $("#btnSave").html("Update");
+        //    //$.ajax({
+        //    //    type: "POST",
+        //    //    url: "/Course/Delete?id=" + id,
+        //    //    contentType: "application/json; charset=utf-8",
+        //    //    dataType: "json",
+        //    //    success: function (data) {
+        //    //        alert(data);
+        //    //        LoadList();
+        //    //    },
+        //    //    error: function () {
+        //    //        alert("Error occured!!")
+        //    //    }
+        //    //});
+        //});
+
+        $("body").on("click", "#editBtn", function () {
+            var id = $(this).attr("data-id");
+
+            $("#btnSave").html("Update");
+            $.ajax({
+                type: "GET",
+                url: "/Course/GetCourseById?id=" + id,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data)
+                    {
+                        $("#Id").val(data.course.Id);
+                        $("#Name").val(data.course.Name);
+                        $("#Code").val(data.course.Code);
+                    }
+                },
+                error: function () {
+                    alert("Error occured!!")
+                }
+            });
+        });
+
+        function Clear() {
+            $("#Id").val("0");
+            $("#Name").val("");
+            $("#Code").val("");
+            $("#btnSave").html("Save");
+        }
+
+      
+    </script>
+}
